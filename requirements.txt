@@ -1,2 +1,5 @@
 # to use YOLO model
-pip install ultralytics 
+$pip install ultralytics 
+
+#to import CORS
+$pip install flask-cors
