@@ -1,0 +1,9 @@
+path: dataset
+train: images/train
+val: images/train
+
+names:
+  0: milk
+  1: yogurt
+  2: butter
+  3: tofuls
