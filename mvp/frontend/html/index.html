@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>Hemia AI MVP</title>
+  <style>
+    canvas {
+      border: 1px solid #ccc;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
 
@@ -10,10 +16,22 @@
 
 <input type="file" id="imageInput" accept="image/*">
 <button onclick="send()">Scan</button>
+<button onclick="saveCorrections()">Save Corrections</button>
+
+<br><br>
+
+<label>Class:</label>
+<select id="labelSelect">
+  <option value="-1">none</option>
+  <option value="0">milk</option>
+  <option value="1">yogurt</option>
+  <option value="2">butter</option>
+  <option value="3">tofu</option>
+</select>
+
+<pre id="result"></pre>
 
 <canvas id="imageCanvas"></canvas>
-
-<div id="result"></div>
 
 <script src="../js/index.js"></script>
 </body>
