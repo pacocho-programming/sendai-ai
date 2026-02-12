@@ -169,3 +169,12 @@ function saveCorrections() {
     .then(res => res.json())
     .then(() => alert("修正内容を保存しました"));
 }
+
+//修正がされた対象物だけ保存
+function saveIfChanged() {
+  if (JSON.stringify(originalDetections) !== JSON.stringify(detections)) {
+    saveCorrections();
+  } else {
+    alert("修正がなかったため保存しませんでした");
+  }
+}
