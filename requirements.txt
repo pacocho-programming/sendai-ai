@@ -1,0 +1,2 @@
+# to use YOLO model
+pip install ultralytics 
