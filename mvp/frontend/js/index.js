@@ -68,6 +68,12 @@ function send() {
           // before 保存（ディープコピー）
           originalDetections = JSON.parse(JSON.stringify(detections));
 
+          //テキストボックスに予測した食材名を代入
+          if (detections.length > 0) {
+            const firstClass = detections[0].class;
+            document.getElementById('food_name').value = LABELS[firstClass]
+          }
+
           document.getElementById("result").innerText =
             JSON.stringify(detections, null, 2);
 
@@ -120,6 +126,7 @@ canvas.addEventListener("mousedown", e => {
       offsetY = my - box.y1;
       dragging = true;
       document.getElementById("labelSelect").value = box.class;
+      document.getElementById('food_name').value = LABELS[box.class];
     }
   });
 
@@ -151,19 +158,30 @@ canvas.addEventListener("mouseup", () => dragging = false);
 document.getElementById("labelSelect").addEventListener("change", e => {
   if (selectedBox) {
     selectedBox.class = Number(e.target.value);
+    document.getElementById('food_name').value = LABELS[selectedBox.class];
     draw();
   }
 });
 
 // 保存
 function saveCorrections() {
+
+  // noen(-1)クラスを除外 filterメソッドでnoneを除外可
+  const filteredAfter = detections.filter(d => d.class !== -1);
+  const filteredBefore = originalDetections.filter(d => d.class !== -1);
+
+  //保存対象が0件なら保存しない
+  if (filteredAfter.length == 0){
+    alert("none以外のクラスがないため保存しません。");
+  }
+
   fetch("http://localhost:5001/save_corrections", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       image_id: imageId,
-      before: originalDetections,
-      after: detections
+      before: filteredBefore,
+      after: filteredAfter
     })
   })
     .then(res => res.json())
@@ -172,9 +190,16 @@ function saveCorrections() {
 
 //修正がされた対象物だけ保存
 function saveIfChanged() {
-  if (JSON.stringify(originalDetections) !== JSON.stringify(detections)) {
+  //ユーザーが予測の再調整を行ったか否か
+  const isModified = JSON.stringify(originalDetections) !== JSON.stringify(detections);
+
+  //予測クラスがnone(-1)以外を対象とする
+  const hasValidClass = detections.some(d => d.class !== -1);
+  
+  if (isModified && hasValidClass) {
     saveCorrections();
   } else {
     alert("修正がなかったため保存しませんでした");
   }
+  
 }

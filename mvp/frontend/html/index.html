@@ -15,7 +15,7 @@
 <h2>Hemia AI 食材スキャン</h2>
 
 <input type="file" id="imageInput" accept="image/*">
-<button onclick="send()">Scan</button>
+<button type="button" onclick="send()">Scan</button>
 <button onclick="saveIfChanged()">Save Corrections</button>
 
 <br><br>
@@ -28,6 +28,8 @@
   <option value="2">butter</option>
   <option value="3">tofu</option>
 </select>
+
+<input type="text" id="food_name">
 
 <pre id="result"></pre>
 

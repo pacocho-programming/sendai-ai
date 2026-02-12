@@ -5,6 +5,7 @@ from PIL import Image
 import sqlite3
 import json
 from datetime import datetime
+import uuid
 
 app = Flask(__name__)
 CORS(app, origins=["http://127.0.0.1:5500", "http://localhost:5500"])
