@@ -48,6 +48,7 @@ function send() {
       const formData = new FormData();
       formData.append("image", blob, "image.jpg");
 
+
       fetch("http://localhost:5001/predict", {
         method: "POST",
         body: formData

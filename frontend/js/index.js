@@ -1,172 +1,411 @@
- // State management
- let foods = JSON.parse(localStorage.getItem('my_foods')) || [];
-        
- // Initialize Icons
- function initIcons() {
-     lucide.createIcons();
- }
+/*
+必要な間数ー＞
+＠画像アップロード間数（firebase.js）
+＠label.txtアップロード間数（firebase.js）
+＠send()＜ーuploadImage(file,imageId),uploadLabel(text,imageId)
+@draw_box()バウンディングボックスで囲む作業
+*/
 
- // Helper: Toggle Modal
- function toggleModal(id) {
-     const modal = document.getElementById(id);
-     modal.classList.toggle('hidden');
-     if (!modal.classList.contains('hidden')) {
-         document.getElementById('food-form').reset();
-         document.getElementById('edit-id').value = '';
-         document.getElementById('modal-title').innerText = '食材を追加';
-         
-         // Set default date to today
-         const today = new Date().toISOString().split('T')[0];
-         document.getElementById('item-expiry').value = today;
-     }
- }
+//import { start } from "repl";
 
- // Helper: Toast notification
- function showToast(msg) {
-     const toast = document.getElementById('toast');
-     toast.innerText = msg;
-     toast.classList.remove('opacity-0');
-     setTimeout(() => toast.classList.add('opacity-0'), 2000);
- }
+//firebase.jsonからuploadImage(),uploadLabel()をインポートする
+//import { uploadImage,uploadLabel } from "./firebase";
+const canvas = document.getElementById("draw_result")
+const ctx = canvas.getContext("2d");
+const MAX_WIDTH = 600;
+const HANDLE_SIZE = 8;
 
- // Calculate days remaining
- function getDaysLeft(dateStr) {
-     const expiry = new Date(dateStr);
-     const today = new Date();
-     today.setHours(0,0,0,0);
-     const diff = expiry - today;
-     return Math.ceil(diff / (1000 * 60 * 60 * 24));
- }
+let img = new Image(); //jsで画像を表示するためのメソッドを読み込み
+let scale = 1;
+let selectedBox = null;
+let dragging = false;
+let offsetX = 0;
+let offsetY = 0;
+let resizing = false;
+let startX = 0;
+let startY = 0;
+let detections = []
 
- // Save & Render
- function saveToStorage() {
-     localStorage.setItem('my_foods', JSON.stringify(foods));
-     renderItems();
- }
 
- function renderItems() {
-     const list = document.getElementById('food-list');
-     const searchTerm = document.getElementById('search-input').value.toLowerCase();
-     const categoryFilter = document.getElementById('filter-category').value;
-     
-     list.innerHTML = '';
-     
-     let total = 0;
-     let warning = 0;
-     let expired = 0;
 
-     const filteredFoods = foods.filter(item => {
-         const matchesSearch = item.name.toLowerCase().includes(searchTerm);
-         const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
-         return matchesSearch && matchesCategory;
-     }).sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
 
-     filteredFoods.forEach(item => {
-         const daysLeft = getDaysLeft(item.expiry);
-         let statusClass = 'safe';
-         let statusText = `あと ${daysLeft} 日`;
-         
-         if (daysLeft < 0) {
-             statusClass = 'expired';
-             statusText = '期限切れ';
-             expired++;
-         } else if (daysLeft <= 3) {
-             statusClass = 'expiring-soon';
-             statusText = 'まもなく期限';
-             warning++;
-         }
-         total++;
 
-         const card = document.createElement('div');
-         card.className = `bg-white p-4 rounded-2xl shadow-sm flex justify-between items-center ${statusClass} transition-all hover:shadow-md`;
-         card.innerHTML = `
-             <div class="flex-1">
-                 <div class="flex items-center gap-2 mb-1">
-                     <span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full">${item.category}</span>
-                     <span class="text-xs font-bold ${daysLeft < 0 ? 'text-red-500' : (daysLeft <= 3 ? 'text-amber-500' : 'text-emerald-500')}">${statusText}</span>
-                 </div>
-                 <h3 class="font-bold text-gray-800">${item.name}</h3>
-                 <p class="text-xs text-gray-400">数量: ${item.quantity || '設定なし'} | 期限: ${item.expiry}</p>
-             </div>
-             <div class="flex gap-1">
-                 <button onclick="editItem('${item.id}')" class="p-2 text-gray-400 hover:text-emerald-500 transition-colors">
-                     <i data-lucide="edit-3" class="w-5 h-5"></i>
-                 </button>
-                 <button onclick="deleteItem('${item.id}')" class="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                     <i data-lucide="trash-2" class="w-5 h-5"></i>
-                 </button>
-             </div>
-         `;
-         list.appendChild(card);
-     });
 
-     if (filteredFoods.length === 0) {
-         list.innerHTML = `
-             <div class="text-center py-10 text-gray-400">
-                 <i data-lucide="package-open" class="mx-auto w-12 h-12 mb-2 opacity-20"></i>
-                 <p>食材が見つかりません</p>
-             </div>
-         `;
-     }
 
-     // Update stats
-     document.getElementById('stat-total').innerText = foods.length;
-     document.getElementById('stat-warning').innerText = foods.filter(i => getDaysLeft(i.expiry) >= 0 && getDaysLeft(i.expiry) <= 3).length;
-     document.getElementById('stat-expired').innerText = foods.filter(i => getDaysLeft(i.expiry) < 0).length;
+//画像の取得
+function getImagefile() {
+  const input = document.getElementById("imageInput");
 
-     initIcons();
- }
+  //アップロードされたファイルがある場合実行
+  if(!input.files || input.files.length === 0){
+    alert("ファイルが選択されていません");
+    return null;
+  }
 
- // Form Submission
- document.getElementById('food-form').addEventListener('submit', (e) => {
-     e.preventDefault();
-     const editId = document.getElementById('edit-id').value;
-     const newItem = {
-         id: editId || Date.now().toString(),
-         name: document.getElementById('item-name').value,
-         category: document.getElementById('item-category').value,
-         quantity: document.getElementById('item-quantity').value,
-         expiry: document.getElementById('item-expiry').value
-     };
+  const file = input.files[0];
+  console.log("選択されたファイル:",file);
+  return file;
+} 
 
-     if (editId) {
-         foods = foods.map(item => item.id === editId ? newItem : item);
-         showToast('更新しました');
-     } else {
-         foods.push(newItem);
-         showToast('追加しました');
-     }
+//Flaskサーバーに送信
+async function send_server(file) {
+  const formData = new FormData();
+  formData.append("image",file); //Flask側でrequest.files["image"]
 
-     saveToStorage();
-     toggleModal('add-modal');
- });
+  const response = await fetch("http://localhost:5001/predict", {
+    method: "POST",
+    body: formData
+  });
 
- // Delete
- function deleteItem(id) {
-     if (confirm('この食材を削除してもよろしいですか？')) {
-         foods = foods.filter(item => item.id !== id);
-         saveToStorage();
-         showToast('削除しました');
-     }
- }
+  if (!response.ok) {
+    throw new Error("Flaskサーバーとの通信は失敗しました");
+  }
+  //dataには{image_id: ,detections: }のJsonファイルが返ってくる
+  const data = await response.json();
+  return data;
 
- // Edit
- function editItem(id) {
-     const item = foods.find(i => i.id === id);
-     if (!item) return;
+}
 
-     document.getElementById('edit-id').value = item.id;
-     document.getElementById('item-name').value = item.name;
-     document.getElementById('item-category').value = item.category;
-     document.getElementById('item-quantity').value = item.quantity;
-     document.getElementById('item-expiry').value = item.expiry;
-     
-     document.getElementById('modal-title').innerText = '食材を編集';
-     document.getElementById('add-modal').classList.remove('hidden');
-     initIcons();
- }
+//firestoreに必要なデータを保存
+async function send_to_db(){
+  //console.log("pusshed button!");
+  //getImagefile();
+  
+}
 
- // Initial render
- window.onload = () => {
-     renderItems();
- };
+//firebase storageにimage,.txtを保存
+async function  send_to_storage(params) {
+  
+}
+
+//最終送信 include(send_to_db and send_to_storage)
+async function  draw_canvas(params) {
+  const file = getImagefile(); 
+  //画像をcanvas用に読み込む
+  const reader = new FileReader();
+  reader.onload = async () => {
+    img.onload = async () => {
+      scale = Math.min(1,MAX_WIDTH / img.width)
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+
+      try {
+        //resultには{image_id: ,detections: }のJsonファイルが返ってくる
+        const result = await send_server(file);
+        detections = result.detections.map(d => {
+          return {
+            class: d.class,
+            confidence: d.confidence,
+            // 配列 [x1, y1, x2, y2] を個別のプロパティに展開
+            x1: d.box[0],
+            y1: d.box[1],
+            x2: d.box[2],
+            y2: d.box[3]
+          };
+        });
+        draw_box(detections);
+        console.log("YOLO結果:", result);
+      } catch(e) {
+        alert(e.message);
+      }
+    };
+    img.src = reader.result;
+  }
+  reader.readAsDataURL(file)
+}
+
+//Boxの表示
+function draw_box(detections) {
+  // canvasをクリア
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // 画像を再描画
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  detections.forEach(d => {
+    const {x1,y1,x2,y2} = d;
+
+    const sx1 = x1 * scale;
+    const sy1 = y1 * scale;
+    const sx2 = x2 * scale;
+    const sy2 = y2 * scale;
+
+    // ===== バウンディングボックス =====
+    ctx.strokeStyle = "blue";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(
+      sx1,
+      sy1,
+      sx2 - sx1,
+      sy2 - sy1
+    );
+
+    // ===== ラベル =====
+    ctx.fillStyle = "red";
+    ctx.font = "16px Arial";
+    ctx.fillText(
+      `class:${d.class} ${(d.confidence * 100).toFixed(1)}%`,
+      sx1,
+      sy1 - 5
+    );
+
+    // ===== リサイズハンドル（右下）=====
+    ctx.fillStyle = "white";
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 1;
+
+    ctx.fillRect(
+      sx2 - HANDLE_SIZE / 2,
+      sy2 - HANDLE_SIZE / 2,
+      HANDLE_SIZE,
+      HANDLE_SIZE
+    );
+
+    ctx.strokeRect(
+      sx2 - HANDLE_SIZE / 2,
+      sy2 - HANDLE_SIZE / 2,
+      HANDLE_SIZE,
+      HANDLE_SIZE
+    );
+  });
+}
+
+// Box がクリックされたか判定
+function hitTest(x,y,box) {
+  return (
+    x >= box.x1 * scale &&
+    x <= box.x2 * scale &&
+    y >= box.y1 * scale &&
+    y <= box.y2 * scale
+  );
+}
+
+//リサイズハンドル判定（右下）
+function hitResizeHandle(x,y,box) {
+  const hx = box.x2 * scale;
+  const hy = box.y2 * scale;
+
+  return (
+    Math.abs(x - hx) < HANDLE_SIZE &&
+    Math.abs(y - hy) < HANDLE_SIZE
+  );
+}
+
+function fix_box() {
+  //mouse down
+  canvas.addEventListener("mousedown", e => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    
+    selectedBox = null;
+
+    for (let box of detections) {
+      if (hitResizeHandle(x,y,box)) {
+        selectedBox = box;
+        resizing = true;
+        return;
+      }
+
+      if (hitTest(x,y,box)) {
+        selectedBox = box;
+        dragging = true;
+        startX = x;
+        startY = y;
+        return;
+      }
+    }
+  });
+
+  //mouse move
+  canvas.addEventListener("mousemove", e => {
+    if(!selectedBox) return;
+    console.log(detections);
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    if(dragging) {
+      const dx = (x - startX) / scale;
+      const dy = (y - startY) / scale;
+
+      selectedBox.x1 += dx;
+      selectedBox.y1 += dy;
+      selectedBox.x2 += dx;
+      selectedBox.y2 += dy;
+
+      startX = x;
+      startY = y;
+      draw_box(detections);
+    }
+    if (resizing) {
+      selectedBox.x2 = x / scale;
+      selectedBox.y2 = y / scale;
+      draw_box(detections);
+    }
+  });
+
+  //mouse up
+  canvas.addEventListener("mouseup", () => {
+    dragging = false;
+    resizing = false;
+  });
+}
+
+function fix_class() {
+
+}
+
+//クラス、ボックスの修正結果
+function fix_result() {
+
+}
+
+function send() {
+
+}
+
+fix_box()
+
+
+
+
+
+
+
+
+
+/*
+// =========================
+// グローバル変数
+// =========================
+let imageId = "";
+let originalDetections = [];
+let detections = [];
+let img = new Image();
+
+const canvas = document.getElementById("imageCanvas");
+const ctx = canvas.getContext("2d");
+
+// =========================
+// Scan（YOLO推論）
+// =========================
+function send() {
+  const input = document.getElementById("imageInput");
+  if (!input.files.length) {
+    alert("画像を選択してください");
+    return;
+  }
+
+  const file = input.files[0];
+  imageId = file.name;
+
+  // 画像表示
+  const reader = new FileReader();
+  reader.onload = () => {
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+
+  // Python(YOLO)へ送信
+  const formData = new FormData();
+  formData.append("image", file);
+
+  fetch("http://localhost:5001/infer", {
+    method: "POST",
+    body: formData
+  })
+    .then(res => res.json())
+    .then(data => {
+      console.log(data);
+      document.getElementById("result").innerText =
+        JSON.stringify(data, null, 2);
+
+      // YOLO結果を内部形式に変換
+      detections = data.map(item => ({
+        x1: item.box[0],
+        y1: item.box[1],
+        x2: item.box[2],
+        y2: item.box[3],
+        class: item.class,
+        confidence: item.confidence
+      }));
+
+      // before 用にコピー
+      originalDetections = JSON.parse(JSON.stringify(detections));
+
+      drawBoxes();
+    });
+}
+
+// =========================
+// バウンディングボックス描画
+// =========================
+function drawBoxes() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0);
+
+  detections.forEach((d, i) => {
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(
+      d.x1,
+      d.y1,
+      d.x2 - d.x1,
+      d.y2 - d.y1
+    );
+
+    ctx.fillStyle = "red";
+    ctx.fillText(
+      `#${i} class:${d.class}`,
+      d.x1,
+      d.y1 - 5
+    );
+  });
+}
+
+// =========================
+// クラス修正（select変更）
+// =========================
+document.getElementById("labelSelect").addEventListener("change", e => {
+  const newClass = parseInt(e.target.value);
+
+  // 今回は「最後に選択したボックス」を修正する想定
+  if (detections.length === 0) return;
+
+  detections[detections.length - 1].class = newClass;
+  drawBoxes();
+});
+
+// =========================
+// Save（変更があったら保存）
+// =========================
+function saveIfChanged() {
+  if (JSON.stringify(originalDetections) === JSON.stringify(detections)) {
+    alert("変更はありません");
+    return;
+  }
+
+  saveCorrections();
+}
+
+function saveCorrections() {
+  fetch("http://localhost:5001/save_corrections", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      image_id: imageId,
+      before: originalDetections,
+      after: detections
+    })
+  })
+    .then(res => res.json())
+    .then(() => alert("修正内容を保存しました"));
+}
+*/

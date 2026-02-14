@@ -2,11 +2,9 @@ import { initializeApp } from "firebase/app";
 import {
   getStorage,
   ref,
-  uploadBytes,
-  getDownloadURL
+  uploadBytes
 } from "firebase/storage";
 
-// .env 読み込み
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -14,15 +12,20 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
+};
+
+const app = initializeApp(firebaseConfig);
+export const storage = getStorage(app);
+
+// 画像アップロード
+export async function uploadImage(file, imageId) {
+  const imageRef = ref(storage, `images/train/img_${imageId}.jpg`);
+  await uploadBytes(imageRef, file);
 }
 
-// 初期化（1回だけ）
-const app = initializeApp(firebaseConfig);
-const storage = getStorage(app);
-
-// アップロード関数　exportはindex.htmlで読み込むため（他のファイルで参照ができるようにするため）
-export async function uploadImage(file) {
-  const storageRef = ref(storage, `images/${file.name}`);
-  await uploadBytes(storageRef, file);
-  return await getDownloadURL(storageRef);
+// label.txt アップロード
+export async function uploadLabel(text, imageId) {
+  const blob = new Blob([text], { type: "text/plain" });
+  const labelRef = ref(storage, `labels/train/img_${imageId}.txt`);
+  await uploadBytes(labelRef, blob);
 }

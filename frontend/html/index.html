@@ -1,176 +1,33 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Food Manager</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
-  <style src="../css/index.css"></style>
+  <title>Hemia AI MVP</title>
+  
 </head>
+<body>
 
-<body class="pb-10">
+<h2>Hemia AI 食材スキャン</h2>
 
-  <!-- Header: 画面端まで広がるように max-w を解除 -->
-  <header class="glass-header sticky top-0 z-10">
-    <div class="max-w-[1600px] mx-auto px-6 py-4 flex justify-between items-center">
-      <h1 class="text-2xl font-extrabold tracking-tight text-emerald-600 flex items-center gap-3">
-        <div class="p-2 bg-emerald-500 text-white rounded-xl shadow-inner">
-          <i data-lucide="refrigerator" class="w-6 h-6"></i>
-        </div>
-        <span class="hidden sm:inline">Hemia Ai</span>
-        <span class="sm:hidden">Smart Food</span>
-      </h1>
-      <div class="flex items-center gap-4">
-        <button onclick="toggleModal('add-modal')"
-          class="floating-add-btn bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl transition-all active:scale-95 flex items-center gap-2 font-bold">
-          <i data-lucide="plus" class="w-5 h-5"></i>
-          <span class="hidden md:inline">食材を追加</span>
-        </button>
-      </div>
-    </div>
-  </header>
+<input type="file" id="imageInput" accept="image/jpeg,image/png">
 
-  <!-- Main Content: 最大幅を 1600px に拡張 -->
-  <main class="max-w-[1600px] mx-auto w-full px-6 py-8 flex-grow">
+<button type="button" onclick="draw_canvas()">Scan</button>
+<div>
+  <label>Class:</label>
+  <select id="labelSelect">
+    <option value="-1">none</option>
+    <option value="0">milk</option>
+    <option value="1">yogurt</option>
+    <option value="2">butter</option>
+    <option value="3">tofu</option>
+  </select>
+  
+  <input type="text" id="food_name">
+</div>
 
-    <!-- Summary Stats: ワイド画面で見栄え良く配置 -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-      <div class="stat-card p-6 rounded-3xl flex items-center gap-5">
-        <div class="p-4 bg-blue-50 text-blue-500 rounded-2xl">
-          <i data-lucide="package" class="w-8 h-8"></i>
-        </div>
-        <div>
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">全在庫</span>
-          <div id="stat-total" class="text-4xl font-black text-gray-800 tracking-tighter">0</div>
-        </div>
-      </div>
-      <div class="stat-card p-6 rounded-3xl border-b-8 border-amber-400 flex items-center gap-5">
-        <div class="p-4 bg-amber-50 text-amber-500 rounded-2xl">
-          <i data-lucide="clock" class="w-8 h-8"></i>
-        </div>
-        <div>
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">期限間近</span>
-          <div id="stat-warning" class="text-4xl font-black text-amber-500 tracking-tighter">0</div>
-        </div>
-      </div>
-      <div class="stat-card p-6 rounded-3xl border-b-8 border-red-400 flex items-center gap-5">
-        <div class="p-4 bg-red-50 text-red-500 rounded-2xl">
-          <i data-lucide="alert-triangle" class="w-8 h-8"></i>
-        </div>
-        <div>
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">期限切れ</span>
-          <div id="stat-expired" class="text-4xl font-black text-red-500 tracking-tighter">0</div>
-        </div>
-      </div>
-    </div>
+<br></br>
+<canvas id="draw_result"></canvas>
 
-    <!-- Filter & Search Section -->
-    <div class="bg-white/50 backdrop-blur-md p-4 rounded-3xl border border-white/50 mb-8">
-      <div class="flex flex-col lg:flex-row gap-4">
-        <div class="relative flex-grow group">
-          <i data-lucide="search"
-            class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors w-5 h-5"></i>
-          <input type="text" id="search-input" oninput="renderItems()" placeholder="食材の名前、キーワードで検索..."
-            class="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none text-lg">
-        </div>
-        <div class="flex gap-3">
-          <select id="filter-category" onchange="renderItems()"
-            class="bg-white border border-gray-200 rounded-2xl px-6 py-4 text-base font-bold focus:outline-none cursor-pointer hover:bg-gray-50 min-w-[200px]">
-            <option value="all">すべてのカテゴリ 📦</option>
-            <option value="野菜">野菜 🥬</option>
-            <option value="肉">肉 🥩</option>
-            <option value="魚">魚 🐟</option>
-            <option value="乳製品">乳製品 🥛</option>
-            <option value="冷凍">冷凍 ❄️</option>
-            <option value="調味料">調味料 🧂</option>
-            <option value="その他">その他 ✨</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Section Label -->
-    <div class="flex items-center justify-between mb-6 px-2">
-      <h2 class="text-lg font-black text-gray-600 uppercase tracking-tighter flex items-center gap-2">
-        <i data-lucide="list"></i>
-        在庫リスト
-      </h2>
-    </div>
-
-    <!-- Food List: PCでは2列、ワイド画面では3列になるようグリッド化 -->
-    <div id="food-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-      <!-- Items will be injected here via index.js -->
-    </div>
-  </main>
-
-  <!-- Add/Edit Modal -->
-  <div id="add-modal"
-    class="fixed inset-0 bg-gray-900/70 hidden z-50 flex items-center justify-center p-4 backdrop-blur-md">
-    <div
-      class="bg-white rounded-[2.5rem] w-full max-w-xl overflow-hidden shadow-2xl transform transition-all animate-in">
-      <div class="bg-emerald-500 p-8 text-white flex justify-between items-center">
-        <div>
-          <h2 id="modal-title" class="text-2xl font-black tracking-tight">食材を追加</h2>
-          <p class="text-emerald-100 text-sm mt-1">冷蔵庫の中身を整理しましょう</p>
-        </div>
-        <button onclick="toggleModal('add-modal')"
-          class="bg-white/20 hover:bg-white/30 p-2.5 rounded-2xl transition-colors">
-          <i data-lucide="x" class="w-6 h-6"></i>
-        </button>
-      </div>
-
-      <form id="food-form" class="p-8 space-y-6">
-        <input type="hidden" id="edit-id">
-        <div>
-          <label class="block text-sm font-bold text-gray-400 mb-2 ml-1">食材名</label>
-          <input type="text" id="item-name" required placeholder="例：黒毛和牛、サンチュ"
-            class="w-full border-2 border-gray-100 rounded-2xl p-4 outline-none text-lg font-medium">
-        </div>
-        <div class="grid grid-cols-2 gap-6">
-          <div>
-            <label class="block text-sm font-bold text-gray-400 mb-2 ml-1">カテゴリ</label>
-            <select id="item-category"
-              class="w-full border-2 border-gray-100 rounded-2xl p-4 outline-none cursor-pointer text-lg font-medium">
-              <option value="野菜">野菜</option>
-              <option value="肉">肉</option>
-              <option value="魚">魚</option>
-              <option value="乳製品">乳製品</option>
-              <option value="冷凍">冷凍</option>
-              <option value="調味料">調味料</option>
-              <option value="その他">その他</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-bold text-gray-400 mb-2 ml-1">数量・単位</label>
-            <input type="text" id="item-quantity" placeholder="2パック、500g"
-              class="w-full border-2 border-gray-100 rounded-2xl p-4 outline-none text-lg font-medium">
-          </div>
-        </div>
-        <div>
-          <label class="block text-sm font-bold text-gray-400 mb-2 ml-1">消費期限</label>
-          <input type="date" id="item-expiry" required
-            class="w-full border-2 border-gray-100 rounded-2xl p-4 outline-none text-lg font-medium">
-        </div>
-        <div class="pt-4">
-          <button type="submit"
-            class="w-full bg-emerald-500 text-white py-5 rounded-[1.5rem] font-black text-xl hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-200 active:scale-[0.97]">
-            リストを更新
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Toast Notification -->
-  <div id="toast"
-    class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900/90 backdrop-blur-md text-white px-10 py-4 rounded-3xl shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-3">
-    <i data-lucide="sparkles" class="w-5 h-5 text-emerald-400"></i>
-    <span id="toast-message" class="font-bold">メッセージ</span>
-  </div>
-
-  <script src="../js/index.js"></script>
+<script src="../js/index.js"></script>
 </body>
-
 </html>
