@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>Firebase Storage Sample</title>
+</head>
+<body>
+  <input type="file" id="file" />
+  <button id="btn">Upload</button>
+  <img id="img" width="300" />
+
+  <script type="module">
+    import { uploadImage } from "./index.js";
+
+    document.getElementById("btn").onclick = async () => {
+      const file = document.getElementById("file").files[0];
+      const url = await uploadImage(file);
+      document.getElementById("img").src = url;
+    };
+  </script>
+</body>
+</html>

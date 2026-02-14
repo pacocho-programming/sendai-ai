@@ -1,0 +1,13 @@
+{
+  "name": "firebase-storage-sample",
+  "private": true,
+  "scripts": {
+    "dev": "vite"
+  },
+  "dependencies": {
+    "firebase": "^9.23.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
