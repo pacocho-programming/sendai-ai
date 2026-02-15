@@ -1,0 +1,244 @@
+/* ===== Reset & Base ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+  background-size: 400% 400%;
+  animation: gradientMove 12s ease infinite;
+  color: #e6f1ff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px 60px;
+}
+
+/* ===== Gradient Animation ===== */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ===== Header ===== */
+header {
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+header h1 {
+  font-size: 3.5rem;
+  font-weight: 900;
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  user-select: none;
+}
+
+header .subtext {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #a0c4ff;
+  margin-left: 20px;
+  flex-grow: 1;
+  user-select: none;
+}
+
+header p {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #ffffff, #ffffff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 6px rgba(0,114,255,0.5);
+  line-height: 1.4;
+  margin-left: 20px;
+  user-select: none;
+}
+
+header button.logout-btn {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0,114,255,0.35);
+  transition: all 0.3s ease;
+  user-select: none;
+  outline-offset: 2px;
+  flex-shrink: 0;
+}
+
+header button.logout-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 40px rgba(0,114,255,0.6);
+}
+
+header button.logout-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 18px rgba(0,114,255,0.35);
+}
+
+/* ===== Control Card ===== */
+.control-card {
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 32px 36px;
+  width: 100%;
+  max-width: 700px;
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 10px 40px rgba(0,198,255,0.25);
+}
+
+.card-title {
+  font-size: 28px;
+  font-weight: 900;
+  margin-bottom: 20px;
+  user-select: none;
+}
+
+.inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.inputs input,
+.inputs button {
+  padding: 14px 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.inputs input {
+  background: rgba(255,255,255,0.08);
+  color: #e6f1ff;
+  border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(6px);
+  flex: 1 1 150px;
+  min-width: 150px;
+}
+
+.inputs button {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,114,255,0.35);
+  flex: 0 0 auto;
+}
+
+.inputs button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0,114,255,0.55);
+}
+
+.inputs button:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 18px rgba(0,114,255,0.35);
+}
+
+/* ===== Label Area ===== */
+.label-area {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  background: rgba(255,255,255,0.06);
+  padding: 14px 20px;
+  border-radius: 16px;
+  backdrop-filter: blur(8px);
+  margin-bottom: 24px;
+  width: 100%;
+  max-width: 700px;
+}
+
+.label-area input,
+.label-area select {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08);
+  color: #e6f1ff;
+  font-size: 16px;
+}
+
+/* ===== Canvas ===== */
+#draw_result {
+  position: relative;
+  display: block;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  background-color: rgba(0,0,0,0.25);
+  pointer-events: auto;
+  max-width: none;
+  width: auto;
+  height: auto;
+  box-shadow: 0 8px 24px rgba(0,198,255,0.3);
+  margin: 0 auto;
+}
+
+#draw_result::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  box-shadow: 0 0 40px rgba(0,198,255,0.2);
+  pointer-events: none;
+}
+
+/* ===== Buttons (LP-style Gradient) ===== */
+button,
+.inputs button,
+.control-card button,
+.label-area button {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0,114,255,0.35);
+  transition: all 0.3s ease;
+  user-select: none;
+  outline-offset: 2px;
+}
+
+button:hover,
+.inputs button:hover,
+.control-card button:hover,
+.label-area button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 40px rgba(0,114,255,0.6);
+}
+
+button:active,
+.inputs button:active,
+.control-card button:active,
+.label-area button:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 18px rgba(0,114,255,0.35);
+}

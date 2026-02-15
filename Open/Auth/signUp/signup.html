@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Hemia AI</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- CSS -->
+  <link rel="stylesheet" href="./signup.css">
+
+</head>
+<body class="bg-[#050505] text-white font-sans antialiased">
+
+  <div class="min-h-screen flex items-center justify-center px-6">
+    <div class="max-w-md w-full bg-[#0f0f0f]/90 backdrop-blur-xl border border-white/10 rounded-3xl p-10 shadow-2xl">
+      <h1 class="text-3xl font-bold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-500">
+        Create an Account
+      </h1>
+
+      <form id="signup-form" class="space-y-6">
+        <div>
+          <label class="block text-gray-400 text-sm mb-2" for="email">Email</label>
+          <input type="email" id="email" placeholder="you@example.com"
+                 class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/10 text-white focus:outline-none focus:border-emerald-400">
+        </div>
+        <div>
+          <label class="block text-gray-400 text-sm mb-2" for="password">Password</label>
+          <input type="password" id="password" placeholder="********"
+                 class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/10 text-white focus:outline-none focus:border-emerald-400">
+        </div>
+
+        <button type="submit"
+          class="w-full px-6 py-3 rounded-full font-medium transition-all duration-300 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+          Sign Up <i data-lucide="user-plus" class="w-4 h-4"></i>
+        </button>
+      </form>
+
+      <p class="text-xs text-gray-500 mt-6 text-center">
+        Already have an account? 
+        <a href="../signIn/signin.html" class="text-emerald-400 hover:underline">Sign In</a>
+      </p>
+    </div>
+  </div>
+
+  <script type="module" src="./signup.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

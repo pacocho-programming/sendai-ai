@@ -4,6 +4,11 @@ import {
   ref,
   uploadBytes,
 } from "firebase/storage";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+
+
+
+
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -16,6 +21,24 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const storage = getStorage(app);
+export const auth = getAuth(app);
+
+
+
+export async function signInUser(email, password) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log("Signed in user:", userCredential.user);
+
+    // 成功したらダッシュボードへ
+    window.location.href = "../idnex.html";
+    return userCredential.user;
+  } catch (error) {
+    console.error("Sign in error:", error);
+    alert("Sign in failed: " + error.message);
+    throw error;
+  }
+}
 
 // 画像アップロード
 export async function uploadImage(file, imageId) {

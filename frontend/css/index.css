@@ -1,95 +1,135 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap');
 
-:root {
-  --primary: #10b981;
-  --primary-dark: #059669;
-  --warning: #f59e0b;
-  --danger: #ef4444;
+
+/* ===== Reset & Base ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
-  background: linear-gradient(135deg, #f0fdf4 0%, #eef2ff 100%);
-  background-attachment: fixed;
-  background-size: cover;
-  color: #1f2937;
   min-height: 100vh;
-  margin: 0;
+  background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+  background-size: 400% 400%;
+  animation: gradientMove 12s ease infinite;
+  color: #e6f1ff;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
 }
 
-.glass-header {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(229, 231, 235, 0.5);
-  width: 100%;
+/* ===== Gradient Animation ===== */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.stat-card {
-  background: white;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  border: 1px solid rgba(229, 231, 235, 0.5);
+/* ===== Headings ===== */
+h2 {
+  font-size: 28px;
+  letter-spacing: 1px;
+  margin-bottom: 25px;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08);
-}
-
-.food-item-card {
-  background: white;
-  border-radius: 1.25rem;
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.food-item-card:hover {
-  border-color: var(--primary);
-  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1);
-}
-
-.safe {
-  border-left: 6px solid var(--primary);
-}
-
-.expiring-soon {
-  border-left: 6px solid var(--warning);
-}
-
-.expired {
-  border-left: 6px solid var(--danger);
-}
-
-input,
+/* ===== Controls ===== */
+input[type="file"],
+input[type="text"],
 select {
-  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e6f1ff;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin: 6px 4px;
+  backdrop-filter: blur(6px);
 }
 
-input:focus,
-select:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+input::file-selector-button {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  border: none;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 10px;
 }
 
-.floating-add-btn {
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+input::file-selector-button:hover {
+  opacity: 0.85;
 }
 
-/* アニメーション */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+select option {
+  background: #1b2a33;
 }
 
-.animate-in {
-  animation: fadeIn 0.4s ease forwards;
+/* ===== Buttons ===== */
+button {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  border: none;
+  color: white;
+  padding: 10px 18px;
+  margin: 6px 4px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: 0 8px 24px rgba(0, 114, 255, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 114, 255, 0.55);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 18px rgba(0, 114, 255, 0.35);
+}
+
+/* ===== Label Area ===== */
+div {
+  margin-top: 10px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+/* === canvas専用：操作安全CSS === */
+#draw_result {
+  /* 座標計算の基準を安定させる */
+  position: relative;
+
+  /* 見た目（安全な範囲） */
+  display: block;
+  margin-top: 24px;
+
+  /* OKな装飾 */
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  background-color: rgba(0,0,0,0.25);
+
+  /* マウスイベントを保証 */
+  pointer-events: auto;
+}
+
+/* 念のため */
+canvas {
+  transform: none !important;
+  filter: none !important;
+}
+
+/* ===== Subtle Glow Effect ===== */
+#draw_result::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  box-shadow: 0 0 40px rgba(0, 198, 255, 0.2);
+  pointer-events: none;
 }

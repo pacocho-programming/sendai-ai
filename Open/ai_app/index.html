@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Hemia AI - Dashboard</title>
+  <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+
+  <!-- Hero / Header -->
+  <header class="w-full py-16 text-center relative">
+    <h1 class="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-500 mb-4">
+      Welcome to Hemia AI
+    </h1>
+    <p class="text-gray-300 text-lg max-w-xl mx-auto">
+      Scan ingredients, create boxes, and manage your kitchen inventory seamlessly.
+    </p>
+    <button id="logoutBtn" style="position: absolute; top: 20px; right: 20px;">Logout</button>
+  </header>
+
+  <!-- Control Card -->
+  <section class="control-card">
+    <h2 class="card-title">Hemia AI 食材登録</h2>
+
+    <div class="inputs">
+      <input type="file" id="imageInput" accept="image/jpeg,image/png">
+      <button id="scanBtn">Scan</button>
+      <button id="add_box">Create Box</button>
+      <button id="send">Send</button>
+    </div>
+
+    <div class="label-area">
+      <label for="labelSelect">Class:</label>
+      <select id="labelSelect">
+        <option value="-1">none</option>
+        <option value="0">milk</option>
+        <option value="1">yogurt</option>
+        <option value="2">butter</option>
+        <option value="3">tofu</option>
+      </select>
+      <input type="text" id="food_name" placeholder="Food Name">
+    </div>
+  </section>
+
+  <!-- Canvas Area -->
+  <canvas id="draw_result"></canvas>
+
+  <script type="module" src="./index.js"></script>
+</body>
+</html>

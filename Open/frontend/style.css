@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #050505;
+  color: white;
+}
+
+::selection {
+  background-color: rgba(16, 185, 129, 0.3);
+}
+
+/* ゆっくり回るアイコン */
+.animate-spin-slow {
+  animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Chat animation */
+.chat-message {
+  transition: all 0.5s ease-out;
+}
+
+.chat-hidden {
+  opacity: 0;
+  transform: translateY(1rem);
+}
+
+.chat-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
