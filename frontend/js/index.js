@@ -130,7 +130,9 @@ function draw_box(detections) {
     const sy2 = y2 * scale;
 
     // ===== バウンディングボックス =====
-    ctx.strokeStyle = "blue";
+
+    //選択されている場合は赤色、さあれていない場合は青色
+    ctx.strokeStyle = d === selectedBox ? "red": "blue";
     ctx.lineWidth = 2;
     ctx.strokeRect(
       sx1,
@@ -138,7 +140,7 @@ function draw_box(detections) {
       sx2 - sx1,
       sy2 - sy1
     );
-
+  
     // ===== ラベル =====
     ctx.fillStyle = "red";
     ctx.font = "16px Arial";
@@ -196,6 +198,7 @@ function fix_box() {
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+    
 
     
     selectedBox = null;
