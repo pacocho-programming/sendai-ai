@@ -230,6 +230,7 @@ function fix_box() {
         //選択しているboxの食材をtextboxに表示
         let selected_class = selectedBox.class;
         document.getElementById("food_name").value = LABELS[selected_class];
+        document.getElementById("labelSelect").value = selected_class;
         //console.log(selected_class);
         //console.log(selectedBox.class);
         //console.log(document.getElementById("labelSelect").value = selectedBox.class);
@@ -279,6 +280,38 @@ function fix_box() {
   });
 }
 
+function createBox() {
+  if (!img.src) {
+    alert("先に画像を読み込んでください");
+    return;
+  }
+
+  // 画像中央付近に適当なサイズで box を作る
+  const boxWidth = img.width * 0.2;
+  const boxHeight = img.height * 0.2;
+
+  const x1 = img.width * 0.4;
+  const y1 = img.height * 0.4;
+
+  const newBox = {
+    class: -1,        // 初期は none
+    confidence: 1.0,  // 手動作成なので仮
+    x1: x1,
+    y1: y1,
+    x2: x1 + boxWidth,
+    y2: y1 + boxHeight
+  };
+
+  detections.push(newBox);
+  selectedBox = newBox;
+
+  // UI 同期
+  document.getElementById("labelSelect").value = "-1";
+  document.getElementById("food_name").value = "";
+
+  draw_box(detections);
+}
+
 //クラス名の変更動作
 function fix_class() {
   const labelSelect = document.getElementById("labelSelect");
@@ -296,7 +329,7 @@ function fix_class() {
       selectedBox = null;
       document.getElementById("food_name").value = "";
     } else {
-      document.getElementById("food_name").value = LABELS[newClass]
+      document.getElementById("food_name").value = LABELS[newClass];
     }
     draw_box(detections);
   });
@@ -322,11 +355,6 @@ function change_to_label() {
     .join("\n");
 }
 
-//クラス、ボックスの修正結果
-function fix_result() {
-
-}
-
 function generateImageId() {
   return `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -341,12 +369,14 @@ function send() {
 }
 
 
+
 //初期化
 fix_box()
 fix_class();
 // index.js の最後に追加
 document.getElementById("scanBtn").addEventListener("click", draw_canvas);
 document.getElementById("send").addEventListener("click", send);
+document.getElementById("add_box").addEventListener("click",createBox);
 
 
 
