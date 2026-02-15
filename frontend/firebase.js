@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import {
   getStorage,
   ref,
-  uploadBytes
+  uploadBytes,
 } from "firebase/storage";
 
 const firebaseConfig = {

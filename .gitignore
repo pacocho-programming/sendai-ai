@@ -1,5 +1,6 @@
 /.venv
-/frontend/js/.env
+/frontend/.env
+/frontend/node_modules
 /mvp/frontend/js/.env
 /firebase_demo/firestore/.env
 /stratagy.txt

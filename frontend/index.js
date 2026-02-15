@@ -21,7 +21,7 @@ const LABELS = {
   "2": "butter",
   "3": "tofu"
 };
-const data = null;
+
 
 let img = new Image(); //jsで画像を表示するためのメソッドを読み込み
 let scale = 1;
@@ -33,6 +33,7 @@ let resizing = false;
 let startX = 0;
 let startY = 0;
 let detections = []
+let data = null;
 
 
 
@@ -83,8 +84,8 @@ async function send_to_db(){
 
 //firebase storageにimage,.txtを保存
 async function  send_to_storage(file,label,image_id) {
-  uploadImage(file,image_id);
-  uploadLabel(label,image_id);
+  await uploadImage(file,image_id);
+  await uploadLabel(label,image_id);
   console.log("送信完了！");
 }
 
@@ -227,7 +228,7 @@ function fix_box() {
         startY = y;
 
         //選択しているboxの食材をtextboxに表示
-        selected_class = selectedBox.class;
+        let selected_class = selectedBox.class;
         document.getElementById("food_name").value = LABELS[selected_class];
         //console.log(selected_class);
         //console.log(selectedBox.class);
@@ -260,14 +261,14 @@ function fix_box() {
       startY = y;
       draw_box(detections);
       //デバック用
-      console.log("移動後のボックス座標: ",typeof(selectedBox));
+      //console.log("移動後のボックス座標: ",typeof(selectedBox));
     }
     if (resizing) {
       selectedBox.x2 = x / scale;
       selectedBox.y2 = y / scale;
       draw_box(detections);
       //デバック用
-      console.log("リサイズ後のボックス座標: ",selectedBox);
+      //console.log("リサイズ後のボックス座標: ",selectedBox);
     }
   });
 
@@ -303,20 +304,22 @@ function fix_class() {
 
 //YOLO学習用label.txtのためにslectedBoxの形式を修正
 function change_to_label() {
-  if (!selectedBox) {
-    alert("ボックスが選択されていません");
-    return;
+  if (!detections || detections.length === 0) {
+    alert("ボックスがありません");
+    return "";
   }
-  //YOLO形式に変換
-  const x_center = ((selectedBox.x1 + selectedBox.x2) / 2) / img.width;
-  const y_center = ((selectedBox.y1 + selectedBox.y2) / 2) / img.height;
-  const width = (selectedBox.x2 - selectedBox.x1) / img.width;
-  const height = (selectedBox.y2 - selectedBox.y1) / img.height;
-  const labelText = `${selectedBox.class} ${x_center.toFixed(6)} ${y_center.toFixed(6)} ${width.toFixed(6)} ${height.toFixed(6)}`;
 
-  //console.log(labelText); //デバック
-  //alert("変更を保存しました!");
-  return labelText
+  return detections
+    .filter(d => d.class !== -1)
+    .map(d => {
+      const x_center = ((d.x1 + d.x2) / 2) / img.width;
+      const y_center = ((d.y1 + d.y2) / 2) / img.height;
+      const width = (d.x2 - d.x1) / img.width;
+      const height = (d.y2 - d.y1) / img.height;
+
+      return `${d.class} ${x_center.toFixed(6)} ${y_center.toFixed(6)} ${width.toFixed(6)} ${height.toFixed(6)}`;
+    })
+    .join("\n");
 }
 
 //クラス、ボックスの修正結果
@@ -324,10 +327,15 @@ function fix_result() {
 
 }
 
+function generateImageId() {
+  return `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
 function send() {
-  file = getImagefile()
+  const file = getImagefile();
+  if(!file) return ;
   const label = change_to_label();
-  const image_id = data.image_id;
+  const image_id = generateImageId();
   send_to_storage(file,label,image_id);
 
 }
@@ -338,6 +346,7 @@ fix_box()
 fix_class();
 // index.js の最後に追加
 document.getElementById("scanBtn").addEventListener("click", draw_canvas);
+document.getElementById("send").addEventListener("click", send);
 
 
 
