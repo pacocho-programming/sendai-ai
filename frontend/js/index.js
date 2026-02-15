@@ -9,7 +9,7 @@
 //import { start } from "repl";
 
 //firebase.jsonからuploadImage(),uploadLabel()をインポートする
-//import { uploadImage,uploadLabel } from "./firebase";
+import { uploadImage,uploadLabel } from "./firebase";
 const canvas = document.getElementById("draw_result")
 const ctx = canvas.getContext("2d");
 const MAX_WIDTH = 600;
@@ -21,6 +21,7 @@ const LABELS = {
   "2": "butter",
   "3": "tofu"
 };
+const data = null;
 
 let img = new Image(); //jsで画像を表示するためのメソッドを読み込み
 let scale = 1;
@@ -68,7 +69,7 @@ async function send_server(file) {
     throw new Error("Flaskサーバーとの通信は失敗しました");
   }
   //dataには{image_id: ,detections: }のJsonファイルが返ってくる
-  const data = await response.json();
+  data = await response.json();
   return data;
 
 }
@@ -81,8 +82,10 @@ async function send_to_db(){
 }
 
 //firebase storageにimage,.txtを保存
-async function  send_to_storage(params) {
-  
+async function  send_to_storage(file,label,image_id) {
+  uploadImage(file,image_id);
+  uploadLabel(label,image_id);
+  console.log("送信完了！");
 }
 
 //最終送信 include(send_to_db and send_to_storage)
@@ -281,16 +284,39 @@ function fix_class() {
   labelSelect.addEventListener("change", e => {
     if(!selectedBox) return;
 
-    const newCass = parseInt(e.target.value);
-    selectedBox.class = newCass;
-    document.getElementById("food_name").value = LABELS[newCass];
+    const newClass = parseInt(e.target.value);
+    selectedBox.class = newClass;
+    if (selectedBox.class === -1) {
+      //detections配列からselectedBoxを削除
+      const index = detections.indexOf(selectedBox);
+      if (index !== -1) {
+        detections.splice(index,1);
+      }
+      selectedBox = null;
+      document.getElementById("food_name").value = "";
+    } else {
+      document.getElementById("food_name").value = LABELS[newClass]
+    }
     draw_box(detections);
   });
 }
 
 //YOLO学習用label.txtのためにslectedBoxの形式を修正
 function change_to_label() {
+  if (!selectedBox) {
+    alert("ボックスが選択されていません");
+    return;
+  }
+  //YOLO形式に変換
+  const x_center = ((selectedBox.x1 + selectedBox.x2) / 2) / img.width;
+  const y_center = ((selectedBox.y1 + selectedBox.y2) / 2) / img.height;
+  const width = (selectedBox.x2 - selectedBox.x1) / img.width;
+  const height = (selectedBox.y2 - selectedBox.y1) / img.height;
+  const labelText = `${selectedBox.class} ${x_center.toFixed(6)} ${y_center.toFixed(6)} ${width.toFixed(6)} ${height.toFixed(6)}`;
 
+  //console.log(labelText); //デバック
+  //alert("変更を保存しました!");
+  return labelText
 }
 
 //クラス、ボックスの修正結果
@@ -299,6 +325,10 @@ function fix_result() {
 }
 
 function send() {
+  file = getImagefile()
+  const label = change_to_label();
+  const image_id = data.image_id;
+  send_to_storage(file,label,image_id);
 
 }
 
@@ -306,6 +336,9 @@ function send() {
 //初期化
 fix_box()
 fix_class();
+// index.js の最後に追加
+document.getElementById("scanBtn").addEventListener("click", draw_canvas);
+
 
 
 
