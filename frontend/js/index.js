@@ -14,6 +14,13 @@ const canvas = document.getElementById("draw_result")
 const ctx = canvas.getContext("2d");
 const MAX_WIDTH = 600;
 const HANDLE_SIZE = 8;
+const LABELS = {
+  "-1": "none",
+  "0": "milk",
+  "1": "yogurt",
+  "2": "butter",
+  "3": "tofu"
+};
 
 let img = new Image(); //jsで画像を表示するためのメソッドを読み込み
 let scale = 1;
@@ -215,6 +222,13 @@ function fix_box() {
         dragging = true;
         startX = x;
         startY = y;
+
+        //選択しているboxの食材をtextboxに表示
+        selected_class = selectedBox.class;
+        document.getElementById("food_name").value = LABELS[selected_class];
+        //console.log(selected_class);
+        //console.log(selectedBox.class);
+        //console.log(document.getElementById("labelSelect").value = selectedBox.class);
         return;
       }
     }
@@ -222,8 +236,9 @@ function fix_box() {
 
   //mouse move
   canvas.addEventListener("mousemove", e => {
+
     if(!selectedBox) return;
-    console.log(detections);
+    
 
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -241,11 +256,15 @@ function fix_box() {
       startX = x;
       startY = y;
       draw_box(detections);
+      //デバック用
+      console.log("移動後のボックス座標: ",typeof(selectedBox));
     }
     if (resizing) {
       selectedBox.x2 = x / scale;
       selectedBox.y2 = y / scale;
       draw_box(detections);
+      //デバック用
+      console.log("リサイズ後のボックス座標: ",selectedBox);
     }
   });
 
@@ -256,7 +275,21 @@ function fix_box() {
   });
 }
 
+//クラス名の変更動作
 function fix_class() {
+  const labelSelect = document.getElementById("labelSelect");
+  labelSelect.addEventListener("change", e => {
+    if(!selectedBox) return;
+
+    const newCass = parseInt(e.target.value);
+    selectedBox.class = newCass;
+    document.getElementById("food_name").value = LABELS[newCass];
+    draw_box(detections);
+  });
+}
+
+//YOLO学習用label.txtのためにslectedBoxの形式を修正
+function change_to_label() {
 
 }
 
@@ -269,7 +302,10 @@ function send() {
 
 }
 
+
+//初期化
 fix_box()
+fix_class();
 
 
 
